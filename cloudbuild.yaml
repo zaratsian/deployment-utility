@@ -1,0 +1,17 @@
+steps:
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+    - 'run'
+    - 'deploy'
+    - 'cloudrunservice'
+    - '--image'
+    - 'us-docker.pkg.dev/cloudrun/container/hello'
+    - '--project'
+    - '${_GCP_PROJECT_ID}'
+    - '--region'
+    - 'us-central1'
+    - '--platform'
+    - 'managed'
+    - '--allow-unauthenticated'
+substitutions:
+  _GCP_PROJECT_ID: "" # default value
