@@ -78,24 +78,18 @@ def bqInsertData(dataset_id, table_name, payload):
         return f'{e}'    
 
 
-def bqQuery(dataset_id, table_name, payload):
+def bqQuery(query):
     try:
-        query = """
-            SELECT name, SUM(number) as total_people
-            FROM `bigquery-public-data.usa_names.usa_1910_2013`
-            WHERE state = 'TX'
-            GROUP BY name, state
-            ORDER BY total_people DESC
-            LIMIT 20
-        """
-        query_job = bigquery_client.query(query)  # Make an API request.
-        
-        print("The query data:")
+        #query = 'select * from `gcpProject.myDataset.myTable`'
+        query_job = bigquery_client.query(query)
+        results = []
         for row in query_job:
-            # Row values can be accessed by field name or index.
-            print("name={}, count={}".format(row[0], row["total_people"]))
+            results.append(dict(row))
+        
+        return json.dumps(results)
     except Exception as e:
         return f'{e}'
+
 
 #############################################################
 #
@@ -144,6 +138,20 @@ def insert():
             payload    = requestPayload['payload']
             
             msg = bqInsertData(dataset_id, table_name, payload)
+            return msg, 200
+        except Exception as e:
+            return f'{e}', 400
+
+
+@app.route("/query", methods = ['GET','POST'])
+def query():
+    if request.method == 'POST':
+        try:
+            requestPayload = request.get_json()
+            
+            query = requestPayload['query']
+            
+            msg = bqQuery(query)
             return msg, 200
         except Exception as e:
             return f'{e}', 400
